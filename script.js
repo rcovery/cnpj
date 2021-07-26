@@ -34,12 +34,14 @@ const app = new Vue({
 
 				// Caso não houver erros
 				if (!data.error) {
+					let current_data
 					// Salva o CNPJ no localStorage
 					if (!localStorage.history) {
 						localStorage.history = ""
+					} else {
+						current_data = JSON.parse(localStorage.history)
 					}
-
-					let current_data = JSON.parse(localStorage.history)
+					
 					current_data[cnpj] = data["NOME FANTASIA"]
 					app.history = current_data
 
