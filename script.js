@@ -34,7 +34,7 @@ const app = new Vue({
 
 				// Caso não houver erros
 				if (!data.error) {
-					let current_data
+					let current_data = {}
 					// Salva o CNPJ no localStorage
 					if (!localStorage.history) {
 						localStorage.history = ""
