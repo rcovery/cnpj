@@ -4,36 +4,46 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Consulta de CNPJ</title>
-	<style type="text/css">
-		* {
-			margin: 0;
-			padding: 0;
-		}
-		.block {
-			background: #dff7ff;
-			width: 200px;
-			box-sizing: border-box;
-			padding: 8px;
-			border-radius: 5px;
-    		border-bottom: solid 2px #4290b1;
-		}
-		.block + .block {
-			margin-top: 10px;
-		}
-	</style>
+	<link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
 	<div id="app">
+		<!-- Botão do histórico de consultas -->
+		<a href="javascript:void(0)" @click="getHistory" v-if="localStorage.history" class="history">
+			<span>Histórico de consultas</span>
+		</a>
+
+		<!-- Formulário -->
 		<form @submit="sendCnpj" onsubmit="return false">
-			<input type="text" id="cnpj" minlength="14" maxlength="18" name="cnpj">
-			<button type="submit">Realizar consulta</button>
+			<input class="search" type="text" id="cnpj" minlength="14" maxlength="18">
+			<button class="search" type="submit">Realizar consulta</button>
 		</form>
 
-		<div class="block" v-for="item in Object.keys(response)">
-			<p style="font-family: monospace;">{{ filter(item) }}</p>
+		<!-- Bloco de informações da empresa -->
+		<div class="grid">
+			<div class="block" v-for="item in Object.keys(response)">
+				<div class="title">
+					<p style="font-family: monospace;">{{ filter(item) }}</p>
+				</div>
+				<div class="content">
+					<p style="font-family: monospace;">{{ response[item] }}</p>
+				</div>
+			</div>
 		</div>
-	</div>
 
+		<!-- Bloco de histórico -->
+		<div class="grid">
+			<a href="javascript:void(0)" @click="loadFromHistory(item)" class="block history_block" v-for="item in Object.keys(history)">
+				<div class="title">
+					<p style="font-family: monospace;">{{ filter(item) }}</p>
+				</div>
+				<div class="content">
+					<p style="font-family: monospace;">{{ history[item] }}</p>
+				</div>
+			</a>
+		</div>
+
+	<br>
 	<script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
 	<script src="script.js"></script>
 </body>

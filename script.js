@@ -1,75 +1,76 @@
+var regex = /^[0-9]+$/;
+
 // Instanciando o VueJS
 const app = new Vue({
 	el: "#app",
 	data: {
-		response: {}
+		// Definindo variáveis reativas
+		response: {},
+		history: {},
+		show_history: false,
+		current_cnpj: null
 	},
 	methods: {
 		// Função para utlizar a API pública
 		sendCnpj: () => {
 			// Pegar valor do cnpj e guardar na variável
-			let cnpj = document.getElementById('cnpj').value
-			let regex = /^[0-9]$/
+			// O parâmetro c é usado caso queira passar o cnpj como argumento
+			let cnpj = app.current_cnpj ?? document.getElementById('cnpj').value
+			cnpj = app.inputFilter(cnpj)
 
-			app.response = {
-			    "atividade_principal": [
-			        {
-			            "text": "Comércio varejista especializado de equipamentos e suprimentos de informática",
-			            "code": "47.51-2-01"
-			        }
-			    ],
-			    "data_situacao": "03/11/2005",
-			    "complemento": "A",
-			    "tipo": "MATRIZ",
-			    "nome": "DT NETWORK INFORMATICA LTDA",
-			    "uf": "SP",
-			    "telefone": "(18) 3623-2801/ (18) 3623-2873",
-			    "email": "escmercantil@terra.com.br",
-			    "atividades_secundarias": [
-			        {
-			            "text": "Reparação e manutenção de computadores e de equipamentos periféricos",
-			            "code": "95.11-8-00"
-			        }
-			    ],
-			    "qsa": [
-			        {
-			            "qual": "49-Sócio-Administrador",
-			            "nome": "VINICIUS VICENTE ALVES TERCARIOL"
-			        },
-			        {
-			            "qual": "49-Sócio-Administrador",
-			            "nome": "PAULO HENRIQUE DE LIMA DARE"
-			        }
-			    ],
-			    "situacao": "ATIVA",
-			    "bairro": "VILA NOVA",
-			    "logradouro": "R CUSSY DE ALMEIDA JUNIOR",
-			    "numero": "2761",
-			    "cep": "16.025-333",
-			    "municipio": "ARACATUBA",
-			    "porte": "MICRO EMPRESA",
-			    "abertura": "25/11/1986",
-			    "natureza_juridica": "206-2 - Sociedade Empresária Limitada",
-			    "fantasia": "DT NETWORK",
-			    "cnpj": "56.764.319/0001-48",
-			    "ultima_atualizacao": "2021-04-22T21:09:12.797Z",
-			    "status": "OK",
-			    "efr": "",
-			    "motivo_situacao": "",
-			    "situacao_especial": "",
-			    "data_situacao_especial": "",
-			    "capital_social": "32000.00",
-			    "extra": {},
-			    "billing": {
-			        "free": true,
-			        "database": true
-			    }
+			if (!cnpj.match(regex)) {
+				alert('Somente números!')
+				return false
+			}
+
+			// Fazer requisição
+			fetch(`https://api-publica.speedio.com.br/buscarcnpj?cnpj=${cnpj}`, {
+				method: "GET",
+			})
+			.then(resp => resp.json())
+			.then(data => {
+				app.response = data
+				app.current_cnpj = null
+
+				// Caso não houver erros
+				if (!data.error) {
+					// Salva o CNPJ no localStorage
+
+					let current_data = JSON.parse(localStorage.history)
+					current_data[cnpj] = data["NOME FANTASIA"]
+					app.history = current_data
+
+					localStorage.history = JSON.stringify(current_data)
+				}
+			})
+		},
+
+		// Função para fazer filtro nas chaves do objeto do CNPJ
+		filter: string => {
+			let newstr = string.charAt(0).toUpperCase() + string.substring(1).toLowerCase()
+			return newstr
+		},
+
+		// Pegar dados do localStorage
+		getHistory: () => {
+			this.show_history = !this.show_history
+			if (this.show_history) {
+				let current_data = JSON.parse(localStorage.history)
+				app.history = current_data
+			} else {
+				app.history = {}
 			}
 		},
 
-		filter: string => {
-			let newstr = string.charAt(0).toUpperCase() + string.substring(1)
-			return newstr.split('_').join(' ')
+		// Carregar informações do localStorage
+		loadFromHistory: item => {
+			app.current_cnpj = item
+			app.sendCnpj()
+		},
+
+		// Função para filtrar input do cnpj
+		inputFilter: (value) => {
+			return value.split(".").join('').split('/').join('').split('-').join('')
 		}
 	}
 })
