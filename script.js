@@ -42,7 +42,7 @@ const app = new Vue({
 						current_data = JSON.parse(localStorage.history)
 					}
 					
-					current_data[cnpj] = data["NOME FANTASIA"]
+					current_data[cnpj] = data["NOME FANTASIA"] ?? data["RAZAO SOCIAL"]
 					app.history = current_data
 
 					localStorage.history = JSON.stringify(current_data)
